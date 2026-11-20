@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Follow-up Tracker</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f6b5c">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#eef2f4;--sf:#fff;--tx:#14262b;--mt:#5b6e74;--ln:#d5dfe2;--ac:#0f6b5c;--acx:#fff;--wn:#b45309;--er:#c0302b;--ok:#1d7a3e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1b1e;--sf:#18292d;--tx:#e6f0f1;--mt:#93a8ad;--ln:#2b4046;--ac:#3fb7a3;--acx:#06201b;--wn:#f0a04b;--er:#ff7b73;--ok:#59c77f}}
+:root[data-theme="dark"]{--bg:#0f1b1e;--sf:#18292d;--tx:#e6f0f1;--mt:#93a8ad;--ln:#2b4046;--ac:#3fb7a3;--acx:#06201b;--wn:#f0a04b;--er:#ff7b73;--ok:#59c77f}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:150px}
+main{max-width:520px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:4px 0 2px}
+.sub{color:var(--mt);font-size:14px;margin:0 0 14px}
+.sum{display:flex;gap:8px;margin-bottom:14px}
+.sum div{flex:1;background:var(--sf);border:1px solid var(--ln);border-radius:10px;padding:10px}
+.sum b{display:block;font-size:24px}
+.sum span{font-size:13px;color:var(--mt)}
+.sum .o b{color:var(--er)}.sum .t b{color:var(--wn)}.sum .d b{color:var(--ok)}
+input,select,textarea,button{font:inherit;color:inherit}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--ln);border-radius:8px;background:var(--bg)}
+textarea{min-height:70px;resize:vertical}
+label{display:block;font-size:14px;color:var(--mt);margin:12px 0 4px}
+.card{background:var(--sf);border:1px solid var(--ln);border-radius:10px;padding:12px;margin-bottom:10px}
+.card.late{border-left:5px solid var(--er)}.card.now{border-left:5px solid var(--wn)}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.top b{font-size:17px}
+.badge{font-size:13px;padding:2px 9px;border-radius:99px;border:1px solid var(--ln);white-space:nowrap}
+.meta{color:var(--mt);font-size:14px;margin-top:2px}
+.due{font-size:14px;margin-top:6px;font-weight:600}
+.late .due{color:var(--er)}.now .due{color:var(--wn)}
+.note{margin-top:6px;font-size:15px}
+.acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.acts a,.acts button,.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 14px;border-radius:8px;border:1px solid var(--ln);background:var(--sf);text-decoration:none;color:var(--tx);cursor:pointer}
+.acts .p,.btn.p{background:var(--ac);color:var(--acx);border-color:var(--ac);font-weight:600}
+.btn.d{color:var(--er)}
+.empty{text-align:center;color:var(--mt);padding:36px 10px}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--sf);border-top:1px solid var(--ln);display:flex;padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;min-height:52px;border:0;background:none;font-size:15px;color:var(--mt)}
+nav button.on{color:var(--ac);font-weight:700;box-shadow:inset 0 3px 0 var(--ac)}
+.fab{position:fixed;right:16px;bottom:calc(68px + env(safe-area-inset-bottom,0px));min-height:52px;padding:0 20px;border-radius:99px;border:0;background:var(--ac);color:var(--acx);font-weight:700;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;z-index:20}
+.sheet.open{display:block}
+.sheet .in{position:absolute;left:0;right:0;bottom:0;max-height:92%;overflow:auto;background:var(--sf);border-radius:16px 16px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px));max-width:520px;margin:0 auto}
+.chips{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.chips button{min-height:40px;padding:0 12px;border-radius:99px;border:1px solid var(--ln);background:var(--bg);cursor:pointer}
+.hist{font-size:14px;color:var(--mt);margin-top:10px}
+.hist div{padding:4px 0;border-top:1px solid var(--ln)}
+.row{display:flex;gap:8px;margin-top:16px}
+.row>*{flex:1}
+.stat{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--ln)}
+.hint{font-size:14px;color:var(--mt)}.grp{font-weight:700;margin:16px 0 6px;color:var(--ac)}.ok{color:var(--ok);font-weight:600;margin:0 0 8px}.chips label{display:inline-flex;gap:6px;align-items:center;margin:0;color:var(--tx)}.chips .dk{width:auto}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+<main>
+<h1>Follow-up Tracker</h1>
+<p class="sub" id="today"></p>
+<div class="sum" id="sum"></div>
+<input id="q" type="search" placeholder="Search name, village, phone" style="margin-bottom:12px" hidden>
+<div id="view"></div>
+</main>
+<button class="fab" id="add">+ Add customer</button>
+<style>nav button{font-size:14px;flex:1;min-height:56px}</style><nav>
+<button data-t="today" class="on">Today</button>
+<button data-t="hot">Hot</button>
+<button data-t="all">Customers</button>
+<button data-t="stats">Summary</button>
+</nav>
+<div class="sheet" id="sheet"><div class="in" id="form"></div></div>
+<script>
+var KEY="followups_v1",ST=["New","Interested","Docs pending","On hold","CGT done","Disbursed","Rejected"],CLOSED=["Disbursed","Rejected"];
+var leads=[],tab="today",toast="";
+try{leads=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){leads=[]}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(leads))}catch(e){}}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function iso(d){var m=d.getMonth()+1,x=d.getDate();return d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(x<10?"0":"")+x}
+function today(){return iso(new Date())}
+function plus(n){var d=new Date();d.setDate(d.getDate()+n);return iso(d)}
+function diff(s){var a=new Date(s+"T00:00:00"),b=new Date(today()+"T00:00:00");return Math.round((a-b)/864e5)}
+function fmt(s){if(!s)return"No date";var n=diff(s),d=new Date(s+"T00:00:00").toLocaleDateString("en-IN",{day:"numeric",month:"short"});
+if(n===0)return"Today ("+d+")";if(n===1)return"Tomorrow ("+d+")";if(n<0)return Math.abs(n)+" day"+(n<-1?"s":"")+" overdue ("+d+")";return d}
+function open_(l){return CLOSED.indexOf(l.status)<0}
+function due(l){return open_(l)&&l.next&&diff(l.next)<=0}
+function wa(p){p=String(p||"").replace(/\D/g,"");if(p.length===10)p="91"+p;return"https://wa.me/"+p}
+function cal(l){var s=(l.next||plus(1)).replace(/-/g,""),e=new Date(l.next+"T00:00:00");e.setDate(e.getDate()+1);
+return"https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent("Call "+l.name+" ("+l.status+")")+"&dates="+s+"/"+iso(e).replace(/-/g,"")+"&details="+encodeURIComponent((l.village||"")+" "+(l.phone||"")+" "+((l.notes[l.notes.length-1]||{}).t||""))}
+function card(l){var n=l.next&&open_(l)?diff(l.next):9,c=n<0?"late":n===0?"now":"",last=l.notes[l.notes.length-1];
+return'<div class="card '+c+'"><div class="top"><b>'+esc(l.name)+'</b><span class="badge">'+esc(l.status)+'</span></div>'+
+'<div class="meta">'+(l.centre?esc(l.centre)+" • ":"")+esc(l.village||"No village")+" • "+esc(l.phone||"No phone")+(l.amt?" • ₹"+esc(l.amt):"")+'</div>'+
+(open_(l)?'<div class="due">'+fmt(l.next)+'</div>':"")+
+(last?'<div class="note">'+esc(last.t)+'</div>':"")+
+'<div class="acts">'+(l.phone?'<a class="p" href="tel:'+esc(l.phone)+'">Call</a><button data-m="'+l.id+'">Message</button>':"")+
+'<button data-e="'+l.id+'">Update</button></div></div>'}
+function render(){
+document.getElementById("today").textContent=new Date().toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long"});
+var o=0,t=0,m=0,mo=today().slice(0,7);
+leads.forEach(function(l){if(due(l)){diff(l.next)<0?o++:t++}if(l.disbursedOn&&l.disbursedOn.slice(0,7)===mo)m++});
+document.getElementById("sum").innerHTML='<div class="o"><b>'+o+'</b><span>Overdue</span></div><div class="t"><b>'+t+'</b><span>Due today</span></div><div class="d"><b>'+m+'</b><span>Loans this month</span></div>';
+var q=document.getElementById("q"),v=document.getElementById("view"),h="";
+q.hidden=tab!=="all";
+document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.dataset.t===tab)});
+document.getElementById("add").style.display=tab==="stats"?"none":"";
+if(tab==="today"){var L=leads.filter(due).sort(function(a,b){return a.next<b.next?-1:1});
+h=L.length?L.map(card).join(""):'<div class="empty">'+(leads.length?"No calls due. Nice work.":"No customers yet. Tap “Add customer” after your next call.")+'</div>'}
+else if(tab==="all"){var s=q.value.toLowerCase(),L=leads.filter(function(l){return!s||(l.name+(l.village||"")+l.phone+l.status+(l.centre||"")).toLowerCase().indexOf(s)>=0}).sort(function(a,b){return(a.next||"9")<(b.next||"9")?-1:1});
+h=L.length?L.map(card).join(""):'<div class="empty">No customers found.</div>'}
+else{h='<div class="card">'+ST.map(function(s){return'<div class="stat"><span>'+s+'</span><b>'+leads.filter(function(l){return l.status===s}).length+'</b></div>'}).join("")+
+'<div class="stat"><span>Total loans disbursed</span><b>'+leads.filter(function(l){return l.disbursedOn}).length+'</b></div></div>'+
+'<div class="card"><b>Quick notes</b>'+qlist()+'</div>'+
+'<div class="card"><b>Backup</b><p class="hint">Your data stays only in this phone’s browser. Copy a backup and send it to yourself on WhatsApp now and then.</p>'+
+'<textarea id="bk" placeholder="Paste a backup here to restore"></textarea><div class="row"><button class="btn p" id="cp">Copy backup</button><button class="btn" id="rs">Restore</button></div><p class="hint" id="bm">'+esc(toast)+'</p></div>'}
+v.innerHTML=h}
+function sheet(id){var l=leads.filter(function(x){return x.id===id})[0]||{name:"",phone:"",village:cv(lc()),centre:lc(),amt:"",status:"New",next:plus(1),notes:[]};
+document.getElementById("form").innerHTML='<b style="font-size:18px">'+(id?"Update customer":"Add customer")+'</b>'+
+'<label>Name</label><input id="fn" value="'+esc(l.name)+'">'+
+'<label>Phone</label><input id="fp" type="tel" inputmode="tel" value="'+esc(l.phone)+'">'+
+'<label>Centre</label><input id="fc" list="cl" value="'+esc(l.centre)+'" placeholder="e.g. KEON-BANSPAL-05"><datalist id="cl">'+centres().map(function(c){return'<option value="'+esc(c)+'">'}).join("")+'</datalist>'+
+'<label>Village</label><input id="fv" value="'+esc(l.village)+'">'+
+'<label>Eligible loan (optional)</label><input id="fa" type="number" inputmode="numeric" value="'+esc(l.amt)+'">'+
+'<label>Status</label><select id="fs">'+ST.map(function(s){return'<option'+(s===l.status?" selected":"")+'>'+s+'</option>'}).join("")+'</select>'+
+'<label>Next follow-up date</label><input id="fd" type="date" value="'+esc(l.next)+'"><div class="chips"><button data-d="1">Tomorrow</button><button data-d="2">2 days</button><button data-d="7">1 week</button><button data-d="30">1 month</button></div>'+
+'<label>Quick notes (tap to use)</label><div class="chips" id="qn">'+qchips()+'</div>'+
+'<label>Note (saved with today’s date)</label><textarea id="fnote" placeholder="What did they say? What is pending?"></textarea><div class="chips"><button id="sq">Save this as a quick note</button></div>'+
+(l.notes.length?'<div class="hist">'+l.notes.slice().reverse().map(function(n){return'<div>'+esc(n.d)+": "+esc(n.t)+'</div>'}).join("")+'</div>':"")+
+'<div class="row"><button class="btn" id="cx">Cancel</button><button class="btn p" id="sv" data-id="'+(id||"")+'">Save</button></div>'+(id?"":'<div class="row"><button class="btn" id="sn">Save and add next</button></div>')+
+(id?'<div class="row"><a class="btn" target="_blank" rel="noopener" href="'+cal(l)+'">Add phone reminder</a><button class="btn d" id="dl" data-id="'+id+'">Delete</button></div>':"");
+document.getElementById("sheet").classList.add("open")}
+function close_(){document.getElementById("sheet").classList.remove("open")}
+document.addEventListener("click",function(e){var t=e.target;
+if(t.dataset.t){tab=t.dataset.t;render()}
+else if(t.id==="add")sheet("");
+else if(t.dataset.e)sheet(t.dataset.e);
+else if(t.id==="cx"||t.id==="sheet")close_();
+else if(t.dataset.d){document.getElementById("fd").value=plus(+t.dataset.d)}
+else if(t.id==="sv"){var n=document.getElementById("fn").value.trim();if(!n){document.getElementById("fn").focus();return}
+var id=t.dataset.id,l=leads.filter(function(x){return x.id===id})[0];
+if(!l){l={id:String(Date.now()),notes:[]};leads.push(l)}
+l.name=n;l.phone=document.getElementById("fp").value.trim();l.village=document.getElementById("fv").value.trim();l.centre=document.getElementById("fc").value.trim().toUpperCase();l.amt=document.getElementById("fa").value;
+var ns=document.getElementById("fs").value;l.status=ns;l.next=document.getElementById("fd").value;
+if(ns==="Disbursed"&&!l.disbursedOn)l.disbursedOn=today();
+var nt=document.getElementById("fnote").value.trim();if(nt)l.notes.push({d:today(),t:nt});
+save();render();try{localStorage.setItem("fu_lastc",l.centre||"")}catch(x){}
+if(window._nx){window._nx=false;sheet("")}else if(open_(l)&&l.next)remind(l);else close_()}
+else if(t.id==="dl"){if(confirm("Delete this customer?")){leads=leads.filter(function(x){return x.id!==t.dataset.id});save();close_();render()}}
+else if(t.id==="cp"){var s=JSON.stringify({leads:leads,qn:QN}),b=document.getElementById("bk");b.value=s;b.select();
+try{navigator.clipboard.writeText(s).then(function(){toast="Copied. Paste it in WhatsApp or Notes.";render()},function(){toast="Select the text above and copy it.";render()})}catch(x){toast="Select the text above and copy it.";render()}}
+else if(t.id==="rs"){try{var d=JSON.parse(document.getElementById("bk").value),qd=null;if(!Array.isArray(d)){qd=d.qn;d=d.leads}if(!Array.isArray(d))throw 0;
+if(confirm("Replace current data with "+d.length+" customers?")){leads=d;if(Array.isArray(qd)){QN=qd;saveQ()}save();toast="Restored "+d.length+" customers.";render()}}catch(x){toast="That backup text is not valid.";render()}}
+});
+function remind(l){document.getElementById("form").innerHTML='<b style="font-size:18px">Saved</b><p class="hint">Set a phone reminder so your phone alarms you: '+esc(fmt(l.next))+'.</p><div class="row"><button class="btn" id="cx">Skip</button><a class="btn p" target="_blank" rel="noopener" href="'+cal(l)+'">Add phone reminder</a></div>'}
+var TPL=[
+{n:"Introduce loan",od:"ନମସ୍କାର {name}, ମୁଁ ଆଲୋକ, Fusion Finance (Naranpur ଶାଖା) ରୁ। ଆମେ ମହିଳାମାନଙ୍କୁ ବ୍ୟବସାୟ ଓ ବ୍ୟକ୍ତିଗତ ଋଣ ଦେଉଛୁ। ମାସିକ କିସ୍ତି, ସହଜ ପ୍ରକ୍ରିୟା। ଅଧିକ ଜାଣିବାକୁ ମୋତେ ଫୋନ୍ କରନ୍ତୁ: 7681857192",en:"Hello {name}, I am Alok from Fusion Finance (Naranpur branch). We give business and personal loans to women, with monthly repayment and a simple process. Call or WhatsApp me for details: 7681857192"},
+{n:"Missed call, call me back",od:"ନମସ୍କାର {name}, ମୁଁ ଆଲୋକ, Fusion Finance ରୁ। ମୁଁ ଆପଣଙ୍କୁ ଫୋନ୍ କରିଥିଲି। ଫୁରସତ୍ ହେଲେ ଦୟାକରି ମୋତେ ଫେରି ଫୋନ୍ କରନ୍ତୁ।",en:"Hello {name}, this is Alok from Fusion Finance. I tried calling you. Please call me back when you are free."},
+{n:"Documents needed",od:"ନମସ୍କାର {name}, ଆପଣଙ୍କ ଋଣ ପାଇଁ ଆଧାର କାର୍ଡ ଓ ଭୋଟର କାର୍ଡ ଦରକାର। ଦୟାକରି ପ୍ରସ୍ତୁତ ରଖନ୍ତୁ। - ଆଲୋକ, Fusion Finance",en:"Hello {name}, for your loan we need your Aadhaar card and Voter ID. Please keep them ready. - Alok, Fusion Finance"},
+{n:"Loan possible on a date",od:"ନମସ୍କାର {name}, ଆପଣଙ୍କ ଋଣ {date} ରେ ପ୍ରକ୍ରିୟା ହୋଇପାରିବ। ମୁଁ ସେଦିନ ଆପଣଙ୍କୁ ଫୋନ୍ କରିବି। - ଆଲୋକ, Fusion Finance",en:"Hello {name}, your loan can be processed on {date}. I will call you that day. - Alok, Fusion Finance"},
+{n:"Installment reminder",od:"ନମସ୍କାର {name}, ଆପଣଙ୍କ କିସ୍ତି {date} ରେ ଦେୟ। ଦୟାକରି ଟଙ୍କା ପ୍ରସ୍ତୁତ ରଖନ୍ତୁ। ଧନ୍ୟବାଦ। - ଆଲୋକ, Fusion Finance",en:"Hello {name}, your installment is due on {date}. Please keep the amount ready. Thank you. - Alok, Fusion Finance"},
+{n:"Thank you",od:"ନମସ୍କାର {name}, Fusion Finance ସହ ଯୁକ୍ତ ହେଲାପାଇଁ ଧନ୍ୟବାଦ। ଯେକୌଣସି ସାହାଯ୍ୟ ପାଇଁ ମୋତେ ଫୋନ୍ କରନ୍ତୁ। - ଆଲୋକ",en:"Hello {name}, thank you for joining Fusion Finance. Call me any time you need help. - Alok"}];
+var mid="",mtpl=0,mlang="od";
+function mlead(){return leads.filter(function(x){return x.id===mid})[0]}
+function mfill(l,s){var d=l.next?new Date(l.next+"T00:00:00").toLocaleDateString("en-IN",{day:"numeric",month:"short"}):"";return s.replace(/\{name\}/g,l.name).replace(/\{date\}/g,d)}
+function mlink(){var l=mlead();document.getElementById("ms").href=wa(l.phone)+"?text="+encodeURIComponent(document.getElementById("mx").value)}
+function mset(){var l=mlead();document.getElementById("mx").value=mfill(l,TPL[mtpl][mlang]);document.querySelectorAll("[data-l]").forEach(function(b){var on=b.dataset.l===mlang;b.style.background=on?"var(--ac)":"";b.style.color=on?"var(--acx)":""});mlink()}
+function msheet(id){mid=id;var l=mlead();
+document.getElementById("form").innerHTML='<b style="font-size:18px">Message '+esc(l.name)+'</b><label>Message type</label><select id="mt">'+TPL.map(function(t,i){return'<option value="'+i+'"'+(i===mtpl?" selected":"")+'>'+t.n+'</option>'}).join("")+'</select><div class="chips"><button data-l="od">Odia</button><button data-l="en">English</button></div><label>Edit before sending</label><textarea id="mx" style="min-height:150px"></textarea><div class="row"><button class="btn" id="cx">Close</button><button class="btn" id="mc">Copy</button></div>'+(GQ.length>1?'<div class="row"><button class="btn" id="gnx">Next member ('+(GQ.length-1)+' left)</button></div>':"")+'<div class="row"><a class="btn p" id="ms" target="_blank" rel="noopener">Send on WhatsApp</a></div>';
+mset();document.getElementById("sheet").classList.add("open")}
+document.addEventListener("click",function(e){var t=e.target;
+if(t.dataset.m)msheet(t.dataset.m);
+else if(t.dataset.l){mlang=t.dataset.l;mset()}
+else if(t.id==="mc"){var x=document.getElementById("mx");x.select();try{navigator.clipboard.writeText(x.value);t.textContent="Copied"}catch(z){}}});
+document.addEventListener("change",function(e){if(e.target.id==="mt"){mtpl=+e.target.value;mset()}});
+document.addEventListener("input",function(e){if(e.target.id==="mx")mlink()});
+var QK="followups_qn_v1",QN=null;
+var QD=[{t:"No response",d:1},{t:"Call back later",d:2},{t:"Switched off",d:1},{t:"Busy, call later",d:1},{t:"Network issue",d:1},{t:"Not interested",s:"Rejected"},{t:"Informed, will decide",s:"Interested",d:3},{t:"Documents pending",s:"Docs pending",d:2}];
+try{QN=JSON.parse(localStorage.getItem(QK)||"null")}catch(e){QN=null}
+if(!Array.isArray(QN))QN=QD.slice();
+function saveQ(){try{localStorage.setItem(QK,JSON.stringify(QN))}catch(e){}}
+function lc(){try{return localStorage.getItem("fu_lastc")||""}catch(e){return""}}
+function cv(c){var r=leads.filter(function(x){return c&&x.centre===c&&x.village});return r.length?r[r.length-1].village:""}
+function centres(){var o={};leads.forEach(function(l){if(l.centre)o[l.centre]=1});return Object.keys(o).sort()}
+function qchips(){return QN.map(function(q,i){return'<button data-q="'+i+'">'+esc(q.t)+'</button>'}).join("")}
+function qlist(){return QN.length?QN.map(function(q,i){return'<div class="stat"><span>'+esc(q.t)+'</span><button class="btn d" data-qd="'+i+'" style="min-height:36px">Delete</button></div>'}).join(""):'<p class="hint">No quick notes yet.</p>'}
+document.addEventListener("click",function(e){var t=e.target;
+if(t.dataset.q!==undefined){var q=QN[+t.dataset.q];document.getElementById("fnote").value=q.t;if(q.d)document.getElementById("fd").value=plus(q.d);if(q.s)document.getElementById("fs").value=q.s}
+else if(t.id==="sq"){var v=document.getElementById("fnote").value.trim();
+if(v&&!QN.some(function(x){return x.t===v})){var o={t:v},s=document.getElementById("fs").value,d=document.getElementById("fd").value;
+if(s!=="New")o.s=s;if(d&&diff(d)>0)o.d=diff(d);QN.push(o);saveQ();document.getElementById("qn").innerHTML=qchips();t.textContent="Saved"}}
+else if(t.id==="sn"){if(!document.getElementById("fn").value.trim()){document.getElementById("fn").focus();return}window._nx=true;document.getElementById("sv").click()}
+else if(t.dataset.qd!==undefined){QN.splice(+t.dataset.qd,1);saveQ();render()}});
+document.addEventListener("change",function(e){if(e.target.id==="fc"){var c=e.target.value.trim().toUpperCase(),v=document.getElementById("fv");if(c&&!v.value)v.value=cv(c)}});
+document.getElementById("q").addEventListener("input",render);
+var SK="followups_set_v1",S={centres:[],custom:[],pin:"",target:0,bk:0,lc:""},Q=[],qi=0;
+try{S=Object.assign(S,JSON.parse(localStorage.getItem(SK)||"{}"))}catch(e){}
+leads.forEach(function(l){if(l.centre&&S.centres.indexOf(l.centre)<0)S.centres.push(l.centre)});
+function sset(){try{localStorage.setItem(SK,JSON.stringify(S))}catch(e){}}
+var R=[{t:"Will decide, call back",st:"Deciding",ask:2},{t:"Agreed for loan",st:"Agreed",d:1},{t:"CGT planned",st:"CGT planned",ask:3},{t:"CGT done",st:"CGT done",d:1},{t:"NR",d:1,a:1},{t:"Missed callback",mc:1,d:0},{t:"Family picked, call later",ask:2},{t:"Busy",d:0},{t:"Switch off",d:1,a:1},{t:"Network issue",d:2,a:1},{t:"Call back",ask:1},{t:"After close",d:1},{t:"Snooze 1 day",d:1},{t:"Informed",st:"Interested",d:3},{t:"She called back",d:0},{t:"Will come to branch",d:2},{t:"Docs collected",d:1},{t:"Interested",st:"Interested",d:2},{t:"Not interested",st:"Rejected"},{t:"Wrong number",st:"Rejected"},{t:"Disbursement",st:"Disbursed"},{t:"Husband will decide",st:"Deciding",ask:1,rs:"Husband decides"},{t:"Visit requested",st:"Visit planned",ask:1},{t:"Call after harvest or festival",st:"On hold",ask:1,rs:"After harvest or festival"},{t:"Existing loan running",st:"On hold",ask:1,rs:"Existing loan"},{t:"EMI too high",st:"Interested",d:3,rs:"EMI too high"},{t:"Wants different amount",st:"Interested",d:2,rs:"Needs different amount"},{t:"Docs not ready",st:"Docs pending",ask:1,rs:"Docs not ready"},{t:"Send details on WhatsApp",d:1},{t:"Shifted or number changed",st:"Rejected",rs:"Shifted away"}];
+function allR(){return R.concat(S.custom.map(function(t){return{t:t,d:1}}))}
+function lget(id){return leads.filter(function(x){return x.id===id})[0]}
+function op(h){document.getElementById("form").innerHTML=h;document.getElementById("sheet").classList.add("open")}
+function opts(a,v){return a.map(function(s){return'<option'+(s===v?" selected":"")+'>'+esc(s)+'</option>'}).join("")}
+function chips(id,at,n){return allR().slice(0,n||99).map(function(r,i){return'<button '+at+'="'+i+'" data-id="'+id+'">'+esc(r.t)+'</button>'}).join("")}
+function apply(id,i,dd,tm){var l=lget(id),r=allR()[i],d=r.d;if(r.ask){if(dd==null){PB={id:id,i:i,f:CF};op(SLOTS);return false;op('<b style="font-size:18px">Call back after</b><div class="chips" style="margin-top:10px"><button data-cb="1">1 day</button><button data-cb="2">2 days</button><button data-cb="3">3 days</button><button data-cb="7">1 week</button></div><div class="row"><button class="btn" id="cx">Cancel</button></div>');return false}d=dd}
+var ps=l.status;UNDO={id:id,s:JSON.stringify(l)};l.notes.push({d:today(),t:r.t,h:new Date().getHours()});l.att=r.a?(l.att||0)+1:0;
+if(r.st){l.status=r.st;if(r.st==="Disbursed"&&!l.disbursedOn)l.disbursedOn=today()}
+l.next=(r.st==="Rejected"||r.st==="Disbursed")?"":plus(d==null?1:d);l.ct=tm||"";if(r.t==="CGT planned")l.cgt=l.next;if(l.status!==ps)l.sd=today();if(r.rs)l.reason=r.rs;if(r.st==="Disbursed"&&!l.rdate)l.rdate=plus(7);if(r.mc){l.miss=(l.miss||0)+1;var n1=new Date();n1.setHours(n1.getHours()+1);if(n1.getHours()>=21||n1.getHours()<7){l.next=plus(1);l.ct="10:00"}else{l.next=today();l.ct=("0"+n1.getHours()).slice(-2)+":"+("0"+n1.getMinutes()).slice(-2)}}else if(NRS.indexOf(r.t)<0)l.miss=0;save();utoast(l.name+": "+r.t);return true}
+function card(l){var n=l.next&&open_(l)?diff(l.next):9,c=n<0?"late":n===0?"now":"",last=l.notes[l.notes.length-1];
+return'<div class="card '+c+'"><div class="top"><b>'+esc(l.name)+'</b><span class="badge">'+esc(l.status)+(l.att>1?" • NR×"+l.att:"")+(l.att>=3?" ⚠":"")+'</span></div>'+
+'<div class="meta">'+esc(l.centre||l.village||"No centre")+(l.loan?" • ₹"+esc(l.loan):"")+" • "+esc(l.phone||"No phone")+(l.best?" • "+esc(l.best):"")+'</div>'+
+(open_(l)?'<div class="due">'+fmt(l.next)+'</div>':"")+(last?'<div class="note">'+esc(last.t)+'</div>':"")+
+(l.status==="CGT done"&&l.nd?'<div class="due" style="color:var(--er)">Loan not given: '+esc(l.nd)+'</div>':"")+(l.dm?'<div class="hint">Decision by: '+esc(l.dm)+'</div>':"")+(l.wamt?'<div class="hint">She wants ₹'+esc(l.wamt)+'</div>':"")+(l.miss>=3?'<div class="due" style="color:var(--er)">Missed '+l.miss+' callbacks. Try her second number or visit.</div>':"")+(l.sd&&["Deciding","Agreed","CGT planned","CGT done"].indexOf(l.status)>=0?'<div class="due" style="color:'+(l.status==="Agreed"&&!l.cgt&&diff(l.sd)<=-3?"var(--er)":"var(--mt)")+'">Waiting '+Math.abs(diff(l.sd))+' days</div>':"")+(["Agreed","CGT planned"].indexOf(l.status)>=0?'<div class="hint">CGT ready: '+(l.docs||[]).length+' of 5</div>':"")+(l.ct&&open_(l)?'<div class="due">Call at '+tm12(l.ct)+'</div>':"")+(l.cgt&&l.status==="CGT planned"?'<div class="due">CGT: '+esc(fmt(l.cgt))+'</div>':"")+(l.pdate&&!l.ppaid?'<div class="due">Promise: ₹'+esc(l.pamt||"?")+' on '+esc(fmt(l.pdate))+'</div>':"")+(open_(l)?'<div class="chips">'+chips(l.id,"data-r",7)+'</div>':"")+
+'<div class="acts">'+(l.phone?'<a class="p" href="tel:'+esc(l.phone)+'">Call</a>':"")+(l.ph2?'<a href="tel:'+esc(l.ph2)+'">Call 2</a>':"")+(l.phone?'<button data-m="'+l.id+'">Message</button>':"")+'<button data-e="'+l.id+'">Update</button></div></div>'}
+function render(){
+document.getElementById("today").textContent=new Date().toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long"});
+var o=0,t=0,m=0,mo=today().slice(0,7),cn=0,nr=0;
+leads.forEach(function(l){if(due(l)){diff(l.next)<0?o++:t++}if(l.disbursedOn&&l.disbursedOn.slice(0,7)===mo)m++;l.notes.forEach(function(x){if(x.d===today()){cn++;if(x.t==="NR")nr++}})});
+document.getElementById("sum").innerHTML='<div class="o"><b>'+o+'</b><span>Overdue</span></div><div class="t"><b>'+t+'</b><span>Due today</span></div><div class="d"><b>'+m+(S.target?"/"+S.target:"")+'</b><span>Loans this month</span></div>';
+var q=document.getElementById("q"),v=document.getElementById("view"),h="",bn=leads.length&&Date.now()-S.bk>6048e5?'<div class="card late"><b>Backup due</b><div class="hint">Open Summary and tap Copy backup.</div></div>':"";
+q.hidden=tab!=="all";
+document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.dataset.t===tab)});
+document.getElementById("add").style.display=tab==="stats"?"none":"";
+if(tab==="today"){var L=leads.filter(due).sort(function(a,b){return(a.centre||"~").localeCompare(b.centre||"~")||(a.next<b.next?-1:a.next>b.next?1:0)||(+b.loan||0)-(+a.loan||0)}),pc="#";
+h=bn+(L.length?'<button class="btn p" id="qs" style="width:100%;margin-bottom:6px">Start calling ('+L.length+')</button>':"");
+L.forEach(function(l){var c=l.centre||"No centre";if(c!==pc){pc=c;h+='<div class="grp">'+esc(c)+' ('+L.filter(function(x){return(x.centre||"No centre")===c}).length+')</div>'}h+=card(l)});
+if(!L.length)h+='<div class="empty">'+(leads.length?"No calls due. Nice work.":"No customers yet. Tap “Add customer”.")+'</div>'}
+else if(tab==="all"){var s=q.value.toLowerCase(),A=leads.filter(function(l){return!s||(l.name+l.centre+l.village+l.phone+l.status).toLowerCase().indexOf(s)>=0}).sort(function(a,b){return(a.next||"9")<(b.next||"9")?-1:1});
+h=A.length?A.map(card).join(""):'<div class="empty">No customers found.</div>'}
+else{h='<div class="card"><div class="stat"><span>Calls logged today</span><b>'+cn+'</b></div><div class="stat"><span>NR today</span><b>'+nr+'</b></div>'+ST.map(function(s){return'<div class="stat"><span>'+s+'</span><b>'+leads.filter(function(l){return l.status===s}).length+'</b></div>'}).join("")+'<div class="stat"><span>Loans this month / target</span><b>'+m+"/"+(S.target||"–")+'</b></div></div>'+
+'<div class="card"><label>Monthly loan target</label><div class="row" style="margin-top:0"><input id="tgv" type="number" inputmode="numeric" value="'+(S.target||"")+'"><button class="btn" id="tg">Save</button></div><label>PIN (empty = no PIN)</label><div class="row" style="margin-top:0"><input id="pnv" type="password" inputmode="numeric" value="'+esc(S.pin)+'"><button class="btn" id="pn">Save</button></div><p class="hint">Centres: '+esc(S.centres.join(", ")||"none yet")+'</p></div>'+
+'<div class="card"><b>Backup</b><p class="hint">Data stays only in this phone’s browser. Copy a backup and send it to yourself on WhatsApp every week.</p><textarea id="bk" placeholder="Paste a backup here to restore"></textarea><div class="row"><button class="btn p" id="cp">Copy backup</button><button class="btn" id="rs">Restore</button></div><p class="hint" id="bm">'+esc(toast)+'</p></div>'}
+v.innerHTML=h}
+function sheet(id,keep,msg){var l=lget(id)||{centre:keep||S.lc||"",status:"New",next:plus(1),notes:[]},D=["Aadhaar","Voter ID","Passbook","Guarantor ready","Group ready"],dk=l.docs||[];
+op((msg?'<p class="ok">'+msg+'</p>':"")+'<b style="font-size:18px">'+(id?"Update customer":"Add customer")+'</b>'+
+'<label>Centre</label><select id="fc"><option value="">Select centre</option>'+opts(S.centres,l.centre)+'<option value="__new">+ New centre…</option></select><div id="nc" style="display:none;gap:8px;margin-top:6px"><input id="ncn" placeholder="New centre name"><button class="btn p" id="nca">Add</button></div>'+
+'<label>Name</label><input id="fn" value="'+esc(l.name)+'"><label>Phone</label><input id="fp" type="tel" inputmode="tel" value="'+esc(l.phone)+'">'+
+'<label>Second phone (optional)</label><input id="fp2" type="tel" inputmode="tel" value="'+esc(l.ph2)+'">'+
+'<label>Eligible loan</label><input id="fl" type="number" inputmode="numeric" value="'+esc(l.loan)+'"><div class="chips"><button data-ln="77000">77000</button><button data-ln="90000">90000</button></div>'+
+'<label>Guarantor (optional)</label><input id="fg" value="'+esc(l.guar)+'"><label>Best time to call</label><select id="fb">'+opts(["","Morning","Afternoon","Evening","After centre close"],l.best)+'</select>'+
+'<label>Status</label><select id="fs">'+opts(ST,l.status)+'</select><label>Next follow-up date</label><input id="fd" type="date" value="'+esc(l.next)+'"><div class="chips"><button data-d="1">Tomorrow</button><button data-d="2">2 days</button><button data-d="7">1 week</button><button data-d="30">1 month</button></div>'+
+'<label>Decision by (husband or family, name and phone)</label><input id="fdm" value="'+esc(l.dm)+'"><label>She wants (amount)</label><input id="fwa" type="number" inputmode="numeric" value="'+esc(l.wamt)+'"><label>Call at (time, optional)</label><input id="fct" type="time" value="'+esc(l.ct)+'"><label>CGT date (if planned)</label><input id="fcg" type="date" value="'+esc(l.cgt)+'"><label>If CGT done: why loan not given yet</label><select id="fnd">'+opts(["","Branch approval pending","Bank account issue","Document issue","Waiting for her","Other"],l.nd)+'</select>'+(id?'<label>Quick remark (sets status and date)</label><div class="chips">'+chips(id,"data-ur")+'</div>':"")+
+'<label>New note (saved with today’s date)</label><textarea id="fnote"></textarea><div class="row" style="margin-top:6px"><select id="vl"><option value="or-IN">Odia</option><option value="hi-IN">Hindi</option><option value="en-IN">English</option></select><button class="btn" id="mic">🎤 Speak</button></div><button class="btn" id="sr" style="margin-top:6px;width:100%">Save this note as a quick remark button</button>'+
+'<label>Payment promise (optional)</label><div class="row" style="margin-top:0"><input id="pdt" type="date" value="'+esc(l.pdate)+'"><input id="pam" type="number" inputmode="numeric" placeholder="Amount" value="'+esc(l.pamt)+'"></div><label>CGT checklist</label><div class="chips">'+D.map(function(x){return'<label><input type="checkbox" class="dk" value="'+x+'"'+(dk.indexOf(x)>=0?" checked":"")+'> '+x+'</label>'}).join("")+'</div>'+
+'<label>Reason or delay tag</label><select id="fz">'+opts(["","Interest rate","EMI too high","No need now","Husband decides","Family refused","Existing loan","Other MFI loan","After harvest or festival","Needs different amount","Docs not ready","Shifted away","Other"],l.reason)+'</select><label>Referred by (optional)</label><input id="fr" value="'+esc(l.ref)+'">'+
+(l.notes.length?'<div class="hist">'+l.notes.slice().reverse().map(function(n){return'<div>'+esc(n.d)+": "+esc(n.t)+'</div>'}).join("")+'</div>':"")+
+'<div class="row"><button class="btn" id="cx">'+(msg?"Done":"Cancel")+'</button><button class="btn p" id="sv2" data-id="'+(id||"")+'">Save</button></div>'+
+(id?'<div class="row"><a class="btn" target="_blank" rel="noopener" href="'+cal(l)+'">Add phone reminder</a><button class="btn d" id="dl" data-id="'+id+'">Delete</button></div>':""))}
+function qshow(){var l=lget(Q[qi]);if(!l){op('<b style="font-size:18px">All done</b><p class="hint">No more calls in this list.</p><div class="row"><button class="btn p" id="cx">Close</button></div>');render();return}
+var last=l.notes[l.notes.length-1];op('<div class="hint">'+(qi+1)+' of '+Q.length+'</div><b style="font-size:20px">'+esc(l.name)+'</b><div class="meta">'+esc(l.centre||"")+(l.loan?" • ₹"+esc(l.loan):"")+(l.best?" • "+esc(l.best):"")+'</div>'+(last?'<div class="note">Last: '+esc(last.t)+'</div>':"")+
+'<div class="acts">'+(l.phone?'<a class="p" href="tel:'+esc(l.phone)+'">Call</a>':"")+(l.ph2?'<a href="tel:'+esc(l.ph2)+'">Call 2</a>':"")+'</div><label>After the call, tap the result</label><div class="chips">'+chips(l.id,"data-qr")+'</div><div class="row"><button class="btn" id="qk">Skip</button><button class="btn" id="cx">Stop</button></div>')}
+function lock(){var d=document.createElement("div");d.style.cssText="position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column;justify-content:center;padding:24px;gap:12px";d.innerHTML='<b style="font-size:20px">Enter PIN</b><input type="password" inputmode="numeric" autocomplete="off">';document.body.appendChild(d);d.querySelector("input").addEventListener("input",function(e){if(e.target.value===S.pin)d.remove()})}
+document.addEventListener("click",function(e){var t=e.target,d=t.dataset;
+if(d.r!=null){CF="c";if(apply(d.id,+d.r))render()}
+else if(d.ur!=null){CF="u";if(apply(d.id,+d.ur)){close_();render()}}
+else if(t.id==="qs"){Q=leads.filter(due).sort(function(a,b){return(a.centre||"~").localeCompare(b.centre||"~")||(+b.loan||0)-(+a.loan||0)}).map(function(l){return l.id});qi=0;qshow()}
+else if(d.qr!=null){CF="q";if(apply(d.id,+d.qr)){qi++;qshow()}}
+else if(t.id==="qk"){qi++;qshow()}
+else if(d.ln){document.getElementById("fl").value=d.ln}
+else if(t.id==="sr"){var x=document.getElementById("fnote").value.trim();if(x&&S.custom.indexOf(x)<0){S.custom.push(x);sset();t.textContent="Added as a quick remark"}}
+else if(t.id==="tg"){var n=parseInt(document.getElementById("tgv").value,10);S.target=isNaN(n)?0:n;sset();render()}
+else if(t.id==="pn"){S.pin=document.getElementById("pnv").value.trim();sset();render()}
+else if(t.id==="cp"){S.bk=Date.now();sset()}
+else if(t.id==="sv2"){var g=function(i){return document.getElementById(i).value.trim()},n2=g("fn");if(!n2){document.getElementById("fn").focus();return}
+var id=d.id,l=lget(id),ph=g("fp").replace(/\D/g,"");
+if(ph&&leads.some(function(y){return y.id!==id&&String(y.phone||"").replace(/\D/g,"")===ph})&&DUP!==ph){DUP=ph;t.textContent="Duplicate phone. Tap Save again to keep both";return}
+var nw=!l;if(nw)l={id:String(Date.now()),notes:[],att:0};
+l.name=n2;l.phone=g("fp");l.ph2=g("fp2");var c=g("fc");l.centre=c==="__new"?"":c;l.loan=g("fl");l.guar=g("fg");l.best=g("fb");if(l.status!==g("fs"))l.sd=today();l.status=g("fs");l.next=g("fd");l.reason=g("fz");l.ref=g("fr");if(g("pdt")!==(l.pdate||""))l.ppaid=false;l.pdate=g("pdt");l.pamt=g("pam");l.ct=g("fct");l.dm=g("fdm");l.wamt=g("fwa");l.cgt=g("fcg");l.nd=g("fnd");if(l.cgt&&l.status==="CGT planned")l.next=l.cgt;
+l.docs=[].slice.call(document.querySelectorAll(".dk:checked")).map(function(y){return y.value});
+if(l.status==="Disbursed"&&!l.disbursedOn)l.disbursedOn=today();if(l.status==="Disbursed"&&!l.rdate)l.rdate=plus(7);
+var nt=g("fnote");if(nt)l.notes.push({d:today(),t:nt});
+if(l.centre)S.lc=l.centre;sset();if(nw)leads.push(l);save();render();
+if(nw)sheet("",l.centre,"Saved. Add the next member.");else if(open_(l)&&l.next)remind(l);else close_()}});
+document.addEventListener("change",function(e){var s=e.target;if(s.id==="fc"&&s.value==="__new"){document.getElementById("nc").style.display="flex";document.getElementById("ncn").focus()}else if(s.id==="fc")document.getElementById("nc").style.display="none"});
+var PB,CF="c",DUP="",FS="",FCt="",_r=render;
+function sres(qv){var tk=qv.toLowerCase().split(/\s+/).filter(Boolean);return leads.filter(function(l){var h=(l.name+" "+(l.centre||"")+" "+(l.guar||"")+" "+(l.village||"")+" "+l.status+" "+(l.phone||"")+" "+(l.ph2||"")).toLowerCase()+" "+String((l.phone||"")+(l.ph2||"")).replace(/\D/g,"");return tk.every(function(x){return h.indexOf(x)>=0})})}
+render=function(){_r();var q=document.getElementById("q"),v=document.getElementById("view"),qv=q.value.trim();q.hidden=false;q.placeholder="Search name, centre or phone";
+if(qv){var F=sres(qv);v.innerHTML='<div class="hint" style="margin-bottom:8px">'+F.length+' found</div>'+(F.length?F.map(card).join(""):'<div class="empty">No match. Try fewer letters or the last digits of the phone.</div>'+(qv.replace(/\D/g,"").length>=6?'<button class="btn p" id="an" data-n="'+esc(qv)+'" style="width:100%">Add this number as a new customer</button>':""))}
+else if(tab==="all"){var F2=leads.filter(function(l){return(!FS||l.status===FS)&&(!FCt||l.centre===FCt)}).sort(function(a,b){return(a.next||"9")<(b.next||"9")?-1:1});
+v.innerHTML='<div class="row" style="margin:0 0 10px"><select id="ff"><option value="">All status</option>'+opts(ST,FS)+'</select><select id="fcf"><option value="">All centres</option>'+opts(S.centres,FCt)+'</select></div>'+cvis()+(F2.length?F2.map(card).join(""):'<div class="empty">No customers found.</div>')}else if(tab==="new"){var NL=leads.filter(function(l){return open_(l)&&!l.notes.length}).sort(function(a,b){return(a.centre||"~").localeCompare(b.centre||"~")||(+b.loan||0)-(+a.loan||0)}),pc="#",h2="";
+NL.forEach(function(l){var c=l.centre||"No centre";if(c!==pc){pc=c;h2+='<div class="grp">'+esc(c)+' ('+NL.filter(function(x){return(x.centre||"No centre")===c}).length+')</div>'}h2+=card(l)});
+v.innerHTML=NL.length?'<div class="hint" style="margin-bottom:8px">Never called: '+NL.length+'. Grouped by centre, bigger loans first.</div><button class="btn p" id="qn" style="width:100%;margin-bottom:6px">Start calling ('+NL.length+')</button>'+h2:'<div class="empty">Everyone has been called at least once.</div>'}
+else if(tab==="later"){var PR={"CGT planned":0,"CGT done":1,"Agreed":1,"Docs pending":2,"Deciding":3,"Interested":3,"On hold":4,"New":5},FL=leads.filter(function(l){return open_(l)&&l.next&&diff(l.next)>0}).sort(function(a,b){return(a.next<b.next?-1:a.next>b.next?1:0)||(PR[a.status]||9)-(PR[b.status]||9)||(+b.loan||0)-(+a.loan||0)}),pd2="",h3="";
+FL.forEach(function(l){if(l.next!==pd2){pd2=l.next;h3+='<div class="grp">'+esc(fmt(l.next))+' ('+FL.filter(function(x){return x.next===l.next}).length+')</div>'}h3+=card(l)});
+v.innerHTML='<div class="hint" style="margin-bottom:8px">Future follow-ups: '+FL.length+'. Each day, warm customers (CGT done, docs pending, interested) come first.</div>'+(h3||'<div class="empty">No future follow-ups yet.</div>')}else if(tab==="hot"){v.innerHTML=hot()}else if(tab==="stats"){v.innerHTML+=funnel()+insights()+'<div class="card"><b>Daily report</b><p class="hint">Copy today’s numbers to send to your manager.</p><button class="btn p" id="rp" style="width:100%">Copy today’s report</button><button class="btn" id="sbk" style="width:100%;margin-top:8px">Share backup (WhatsApp)</button><p class="hint" id="rpm"></p></div><div class="card"><b>Import from Excel</b><p class="hint">Choose your Excel or CSV list. It is read on this phone and saved in this phone’s storage. Loan number, bureau score and EMI are not imported.</p><input type="file" id="xf" accept=".xlsx,.xls,.csv"><div id="xp"></div></div><div class="card"><b>Import list</b><p class="hint">One member per line: Centre, Name, Phone, Loan. Duplicate phones are skipped.</p><textarea id="imt" style="min-height:120px"></textarea><div class="row"><button class="btn p" id="imp">Import</button></div><p class="hint" id="imm"></p></div>'}else if(tab==="today"){var tm=leads.filter(function(l){return open_(l)&&l.next===plus(1)}).length,cold=leads.filter(function(l){if(!open_(l)||due(l))return false;var ld=l.notes.length?l.notes[l.notes.length-1].d:iso(new Date(+String(l.id).split("_")[0]));return diff(ld)<=-7});v.innerHTML=daily()+ICBTN+'<div class="hint" style="margin-bottom:6px">Tomorrow: '+tm+' calls planned</div>'+promos()+refs()+timed()+v.innerHTML+(cold.length?'<div class="grp">Gone cold, no contact for 7+ days ('+cold.length+')</div>'+cold.map(card).join(""):"")}};
+document.getElementById("q").addEventListener("input",render);
+document.addEventListener("change",function(e){var s=e.target;if(s.id==="ff"){FS=s.value;render()}else if(s.id==="fcf"){FCt=s.value;render()}});
+document.addEventListener("click",function(e){var t=e.target,d=t.dataset;
+if(d.cb!=null){var p=PB;if(p&&apply(p.id,p.i,+d.cb)){if(p.f==="q"){qi++;qshow()}else{close_();render()}}}
+else if(t.id==="nca"){var nn=document.getElementById("ncn").value.trim();if(nn){if(S.centres.indexOf(nn)<0)S.centres.push(nn);sset();var s2=document.getElementById("fc"),o=document.createElement("option");o.textContent=nn;s2.insertBefore(o,s2.lastChild);s2.value=nn;document.getElementById("nc").style.display="none"}}});
+document.addEventListener("click",function(e){var t=e.target;
+if(t.id==="dl"){e.stopPropagation();if(t.dataset.arm){leads=leads.filter(function(x){return x.id!==t.dataset.id});save();close_();render()}else{t.dataset.arm=1;t.textContent="Tap again to delete"}}
+else if(t.id==="rs"){e.stopPropagation();try{var a=JSON.parse(document.getElementById("bk").value);if(!Array.isArray(a))throw 0;if(t.dataset.arm){leads=a;save();toast="Restored "+a.length+" customers.";render()}else{t.dataset.arm=1;t.textContent="Tap again to restore "+a.length}}catch(x){toast="That backup text is not valid.";render()}}},true);
+document.addEventListener("click",function(e){if(e.target.id!=="imp")return;var n=0,sk=0;
+document.getElementById("imt").value.split(/\n/).forEach(function(ln){var p=ln.split(/[,\t|]/).map(function(x){return x.trim()});if(p.length<3||!p[1])return;
+var ph=p[2].replace(/\D/g,"");if(ph&&leads.some(function(x){return String(x.phone||"").replace(/\D/g,"")===ph})){sk++;return}
+var c=p[0];if(c&&S.centres.indexOf(c)<0)S.centres.push(c);
+leads.push({id:String(Date.now())+"_"+n,name:p[1],phone:p[2],centre:c,loan:(p[3]||"").replace(/\D/g,""),status:"New",next:today(),notes:[],att:0,docs:[]});n++});
+sset();save();render();var m=document.getElementById("imm");if(m)m.textContent="Imported "+n+", skipped "+sk+" duplicates."});
+document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest('a[href^="tel:"]');if(!a)return;var num=a.getAttribute("href").slice(4);
+setTimeout(function(){if(document.hidden||!document.hasFocus())return;try{navigator.clipboard.writeText(num)}catch(x){}
+var b=document.createElement("div");b.style.cssText="position:fixed;left:12px;right:12px;bottom:90px;z-index:60;background:var(--tx);color:var(--bg);padding:12px;border-radius:10px;text-align:center";b.textContent="Dialer did not open. Number "+num+" copied. Paste it in your phone dial pad.";document.body.appendChild(b);setTimeout(function(){b.remove()},5000)},900)});
+var UNDO=null;
+function utoast(m){var o=document.getElementById("ut");if(o)o.remove();var b=document.createElement("div");b.id="ut";b.style.cssText="position:fixed;left:12px;right:12px;bottom:90px;z-index:60;background:var(--tx);color:var(--bg);padding:8px 8px 8px 14px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;gap:8px";b.innerHTML='<span>'+esc(m)+'</span><button id="ud" style="min-height:40px;padding:0 14px;border:0;border-radius:8px;background:var(--ac);color:var(--acx);font-weight:700">Undo</button>';document.body.appendChild(b);setTimeout(function(){if(b.parentNode)b.remove()},6000)}
+document.addEventListener("click",function(e){var t=e.target;
+if(t.id==="ud"&&UNDO){var i=leads.findIndex(function(x){return x.id===UNDO.id});if(i>=0)leads[i]=JSON.parse(UNDO.s);UNDO=null;save();var o=document.getElementById("ut");if(o)o.remove();close_();render()}
+else if(t.id==="an"){sheet("");document.getElementById("fp").value=t.dataset.n}
+else if(t.id==="rp"){var td=today(),c=0,nr=0,it=0,ni=0,dz=0,IN=["Informed","Interested","She called back","Will come to branch","Docs collected"];
+leads.forEach(function(l){if(l.disbursedOn===td)dz++;l.notes.forEach(function(x){if(x.d===td){c++;if(["NR","Busy","Switch off","Network issue"].indexOf(x.t)>=0)nr++;if(IN.indexOf(x.t)>=0)it++;if(x.t==="Not interested")ni++}})});
+var tx="Report "+td+"\nCalls logged: "+c+"\nNo response: "+nr+"\nInterested: "+it+"\nNot interested: "+ni+"\nLoans disbursed: "+dz+"\nStill due: "+leads.filter(due).length;
+var m=document.getElementById("rpm");m.style.whiteSpace="pre-wrap";m.textContent=tx;try{navigator.clipboard.writeText(tx)}catch(x){}}});
+var XR=[];
+document.addEventListener("change",function(e){if(e.target.id!=="xf")return;var f=e.target.files[0],xp=document.getElementById("xp");if(!f)return;
+if(typeof XLSX==="undefined"){xp.innerHTML='<p class="hint">Excel reader did not load. Check your internet and reopen the app.</p>';return}
+var rd=new FileReader();rd.onload=function(){try{var wb=XLSX.read(rd.result,{type:"array"}),best=null;
+wb.SheetNames.forEach(function(nm){if(best)return;var rows=XLSX.utils.sheet_to_json(wb.Sheets[nm],{header:1,defval:""});for(var i=0;i<Math.min(rows.length,12);i++){var j=rows[i].map(function(x){return String(x).toLowerCase()});if(j.some(function(x){return/mobile|phone/.test(x)})&&j.some(function(x){return/member|name/.test(x)})){best={rows:rows,h:i,j:j};break}}});
+if(!best)throw 0;
+var ix=function(re){return best.j.findIndex(function(x){return re.test(x)})},c={n:ix(/member/),c:ix(/cent/),p:ix(/mobile|phone/),l:ix(/eligible/),g:ix(/guarantor/),o:ix(/officer/)};if(c.n<0)c.n=ix(/name/);
+XR=[];for(var i=best.h+1;i<best.rows.length;i++){var r=best.rows[i],nm=String(r[c.n]||"").trim();if(!nm)continue;
+XR.push({o:c.o>=0?String(r[c.o]).trim():"",c:c.c>=0?String(r[c.c]).trim():"",n:nm,p:c.p>=0?String(r[c.p]).replace(/\D/g,"").slice(-10):"",l:c.l>=0?String(r[c.l]).replace(/\D/g,""):"",g:c.g>=0?String(r[c.g]).trim():""})}
+var os=[];XR.forEach(function(x){if(x.o&&os.indexOf(x.o)<0)os.push(x.o)});
+xp.innerHTML='<p class="ok">'+XR.length+' members found.</p>'+(os.length?'<label>Import only this officer’s members</label><select id="xo"><option value="">All officers</option>'+opts(os,"")+'</select>':"")+'<label>Calls per day (spreads the list over several days)</label><input id="xd" type="number" inputmode="numeric" value="30"><div class="row"><button class="btn p" id="xi">Import</button></div>'}catch(x){xp.innerHTML='<p class="hint">Could not read this file. Use the Ujala list that has Member Name and Mobile Number columns.</p>'}};rd.readAsArrayBuffer(f)});
+document.addEventListener("click",function(e){if(e.target.id!=="xi")return;var xo=document.getElementById("xo"),of=xo?xo.value:"",pd=Math.max(1,parseInt(document.getElementById("xd").value,10)||30),
+L=XR.filter(function(x){return!of||x.o===of}).sort(function(a,b){return a.c.localeCompare(b.c)}),n=0,sk=0;
+L.forEach(function(x){if(x.p&&leads.some(function(y){return String(y.phone||"").replace(/\D/g,"").slice(-10)===x.p})){sk++;return}
+if(x.c&&S.centres.indexOf(x.c)<0)S.centres.push(x.c);
+leads.push({id:String(Date.now())+"_x"+n,name:x.n,phone:x.p,centre:x.c,loan:x.l,guar:x.g,status:"New",next:plus(Math.floor(n/pd)),notes:[],att:0,docs:[]});n++});
+sset();save();render();var xp=document.getElementById("xp");if(xp)xp.innerHTML='<p class="ok">Imported '+n+', skipped '+sk+' already saved. Open the Today tab.</p>'});
+var REC=null;
+document.addEventListener("click",function(e){var t=e.target;
+if(t.id==="qn"){Q=leads.filter(function(l){return open_(l)&&!l.notes.length}).sort(function(a,b){return(a.centre||"~").localeCompare(b.centre||"~")||(+b.loan||0)-(+a.loan||0)}).map(function(l){return l.id});qi=0;qshow()}
+else if(t.id==="mic"){var SR=window.SpeechRecognition||window.webkitSpeechRecognition,ta=document.getElementById("fnote");
+if(REC){REC.stop();return}
+if(!SR){t.textContent="Not supported. Use keyboard mic";return}
+REC=new SR();REC.lang=document.getElementById("vl").value;REC.interimResults=false;REC.continuous=false;
+REC.onresult=function(ev){var s=ev.results[0][0].transcript;ta.value=(ta.value?ta.value+" ":"")+s};
+REC.onerror=function(ev){t.textContent=ev.error==="not-allowed"?"Mic blocked. Use keyboard mic":"Try again"};
+REC.onend=function(){REC=null;if(/Listening/.test(t.textContent))t.textContent="🎤 Speak"};
+t.textContent="Listening… tap to stop";try{REC.start()}catch(x){REC=null;t.textContent="Use keyboard mic"}}});
+function daily(){var c=0,dt=S.dt||30;leads.forEach(function(l){l.notes.forEach(function(x){if(x.d===today())c++})});var p=Math.min(100,Math.round(c*100/dt));
+return'<div class="card"><div class="stat" style="border:0;padding:0 0 6px"><span>Calls today</span><b>'+c+' / '+dt+'</b></div>'+winl()+'<div style="height:10px;background:var(--ln);border-radius:6px"><div style="width:'+p+'%;height:10px;background:var(--ac);border-radius:6px"></div></div></div>'}
+function promos(){var PL=leads.filter(function(l){return l.pdate&&!l.ppaid&&diff(l.pdate)<=0});return PL.length?'<div class="grp">Payments promised ('+PL.length+')</div>'+PL.map(function(l){return card(l)+'<div class="acts" style="margin:-4px 0 10px"><button class="btn p" data-pp="'+l.id+'">Paid</button><button class="btn" data-pm="'+l.id+'">Not paid, +2 days</button></div>'}).join(""):""}
+var NRS=["NR","Busy","Switch off","Network issue","Snooze 1 day","Missed callback"];
+function funnel(){var a=0,b=0,c=0,d=0,pr=0,B={M:[0,0],A:[0,0],E:[0,0]};
+leads.forEach(function(l){if(l.notes.length)a++;if(l.notes.some(function(x){return NRS.indexOf(x.t)<0}))b++;if(["Interested","Deciding","Agreed","CGT planned","CGT done","Docs pending"].indexOf(l.status)>=0)c++;if(l.disbursedOn)d++;if(l.pdate&&!l.ppaid)pr+=+l.pamt||0;
+l.notes.forEach(function(x){if(x.h==null)return;var k=x.h<12?"M":x.h<16?"A":"E";B[k][0]++;if(NRS.indexOf(x.t)<0)B[k][1]++})});
+var nm={M:"Morning (before 12)",A:"Afternoon (12 to 4)",E:"Evening (after 4)"},bt=["M","A","E"].map(function(k){return'<div class="stat"><span>'+nm[k]+'</span><b>'+(B[k][0]?Math.round(B[k][1]*100/B[k][0])+"% of "+B[k][0]:"–")+'</b></div>'}).join("");
+return'<div class="card"><b>Funnel</b><div class="stat"><span>Called</span><b>'+a+'</b></div><div class="stat"><span>Reached (someone answered)</span><b>'+b+'</b></div><div class="stat"><span>Interested or in process</span><b>'+c+'</b></div><div class="stat"><span>Disbursed</span><b>'+d+'</b></div><div class="stat"><span>Promised payments pending</span><b>₹'+pr+'</b></div></div><div class="card"><b>Best time to call</b><p class="hint">Share of calls where someone answered.</p>'+bt+'<label>Calling window (hours, 24 hour clock)</label><div class="row" style="margin-top:0"><input id="wfv" type="number" placeholder="From, e.g. 10" value="'+(S.wf||"")+'"><input id="wtv" type="number" placeholder="To, e.g. 13" value="'+(S.wt||"")+'"></div><label>Daily call target</label><div class="row" style="margin-top:0"><input id="dtv" type="number" inputmode="numeric" value="'+(S.dt||30)+'"><button class="btn" id="dts">Save</button></div></div>'}
+document.addEventListener("click",function(e){var t=e.target,d=t.dataset,l;
+if(d.pp&&(l=lget(d.pp))){l.ppaid=true;l.notes.push({d:today(),t:"Payment received ₹"+(l.pamt||"")});save();render()}
+else if(d.pm&&(l=lget(d.pm))){l.pdate=plus(2);l.notes.push({d:today(),t:"Promise missed, new date"});save();render()}
+else if(t.id==="dts"){S.dt=parseInt(document.getElementById("dtv").value,10)||30;S.wf=parseInt(document.getElementById("wfv").value,10)||0;S.wt=parseInt(document.getElementById("wtv").value,10)||0;sset();render()}});
+(function(){var q=document.getElementById("q");q.removeAttribute("hidden");try{Object.defineProperty(q,"hidden",{get:function(){return false},set:function(){}})}catch(e){}q.removeEventListener("input",_r)})();
+ST=["New","Interested","Deciding","Agreed","CGT planned","CGT done","Docs pending","On hold","Disbursed","Rejected"];
+var SLOTS='<b style="font-size:18px">Call her back at</b><div class="chips" style="margin-top:10px"><button data-sl="0|17:00">Today 5 PM</button><button data-sl="0|19:00">Today 7 PM</button><button data-sl="1|10:00">Tomorrow 10 AM</button><button data-sl="1|17:00">Tomorrow 5 PM</button><button data-sl="2|10:00">2 days, 10 AM</button><button data-sl="3|10:00">3 days, 10 AM</button><button data-sl="7|10:00">1 week, 10 AM</button><button data-sl="30|10:00">1 month</button><button data-sl="60|10:00">2 months</button><button data-sl="90|10:00">3 months</button></div><label>Or pick date and time</label><div class="row" style="margin-top:0"><input id="sd" type="date"><input id="stm" type="time"></div><div class="row"><button class="btn p" id="sgo">Set</button></div><div class="row"><button class="btn" id="cx">Cancel</button></div>';
+function tm12(t){if(!t)return"";var h=+t.slice(0,2);return(h%12||12)+t.slice(2)+(h<12?" AM":" PM")}
+function cal(l){var d=(l.next||plus(1)).replace(/-/g,""),st,en;
+if(l.ct){var e2=new Date(2000,0,1,+l.ct.slice(0,2),+l.ct.slice(3,5)+30),z=function(n){return("0"+n).slice(-2)};st=d+"T"+l.ct.replace(":","")+"00";en=d+"T"+z(e2.getHours())+z(e2.getMinutes())+"00"}
+else{var e=new Date((l.next||plus(1))+"T00:00:00");e.setDate(e.getDate()+1);st=d;en=iso(e).replace(/-/g,"")}
+return"https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent("Call "+l.name+" ("+l.status+")")+"&dates="+st+"/"+en+"&details="+encodeURIComponent((l.centre||"")+" "+(l.phone||"")+" "+((l.notes[l.notes.length-1]||{}).t||""))}
+function timed(){var T=leads.filter(function(l){return open_(l)&&l.ct&&l.next&&diff(l.next)<=0}).sort(function(a,b){return a.ct<b.ct?-1:1});return T.length?'<div class="grp">Calls with a set time ('+T.length+')</div>'+T.map(card).join(""):""}
+function hot(){var D=leads.filter(function(l){return open_(l)&&l.status==="Deciding"}).sort(function(a,b){return((a.next||"9")+(a.ct||"99"))<((b.next||"9")+(b.ct||"99"))?-1:1});
+var h=ICBTN+'<div class="grp">Waiting for her decision ('+D.length+')</div>'+(D.length?D.map(card).join(""):'<div class="hint">No one waiting. When someone says she will decide, tap “Will decide, call back”.</div>');
+var G={"Visit planned":"Visits planned (she asked you to come)","Agreed":"Agreed for loan, CGT not set","CGT planned":"CGT planned","CGT done":"CGT done, loan not given yet"};
+Object.keys(G).forEach(function(s){var L=leads.filter(function(l){return l.status===s}).sort(function(a,b){return(a.cgt||a.next||"9")<(b.cgt||b.next||"9")?-1:1});h+='<div class="grp">'+G[s]+' ('+L.length+')</div>'+(L.length?L.map(card).join(""):'<div class="hint">None</div>')});return h}
+document.addEventListener("click",function(e){var d=e.target.dataset;if(!d.sl)return;var p=PB,x=d.sl.split("|");if(p&&apply(p.id,p.i,+x[0],x[1])){if(p.f==="q"){qi++;qshow()}else{close_();render()}}});
+var ICBTN='<button class="btn p" id="ical" style="width:100%;margin-bottom:6px">Add all reminders to calendar</button><p class="hint" id="icm"></p>';
+function ics(){var z=function(n){return("0"+n).slice(-2)},n=new Date(),ds=""+n.getFullYear()+z(n.getMonth()+1)+z(n.getDate())+"T"+z(n.getHours())+z(n.getMinutes())+"00",E=[];
+function ev(id,title,date,time,al){var d=date.replace(/-/g,""),L=["BEGIN:VEVENT","UID:"+id+"@fu","DTSTAMP:"+ds];
+if(time){var e2=new Date(2000,0,1,+time.slice(0,2),+time.slice(3,5)+30);L.push("DTSTART:"+d+"T"+time.replace(":","")+"00","DTEND:"+d+"T"+z(e2.getHours())+z(e2.getMinutes())+"00")}else L.push("DTSTART;VALUE=DATE:"+d);
+L.push("SUMMARY:"+title.replace(/[,;\n]/g," "));al.forEach(function(a){L.push("BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:Reminder","TRIGGER:"+a,"END:VALARM")});L.push("END:VEVENT");E.push(L.join("\r\n"))}
+leads.forEach(function(l){
+if(open_(l)&&l.ct&&l.next&&diff(l.next)>=0)ev(l.id+"c","Call "+l.name+" ("+l.status+")",l.next,l.ct,["-PT10M"]);
+if(l.status==="CGT planned"&&l.cgt&&diff(l.cgt)>=0)ev(l.id+"g","CGT: "+l.name+" "+(l.centre||""),l.cgt,"",["-PT15H","PT8H"]);
+if(l.pdate&&!l.ppaid&&diff(l.pdate)>=0)ev(l.id+"p","Collect Rs "+(l.pamt||"")+" from "+l.name,l.pdate,"",["PT8H"])});
+return"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//FollowUp//EN\r\n"+E.join("\r\n")+"\r\nEND:VCALENDAR"}
+document.addEventListener("click",function(e){var t=e.target;
+if(t.id==="ical"){var tx=ics(),c=(tx.match(/BEGIN:VEVENT/g)||[]).length,m=document.getElementById("icm");if(!c){if(m)m.textContent="No timed calls, CGT dates or payment promises to add.";return}
+var b=new Blob([tx],{type:"text/calendar"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="followups.ics";document.body.appendChild(a);a.click();a.remove();if(m)m.textContent=c+" reminders saved in followups.ics. Open that file and choose Calendar."}
+else if(t.id==="sgo"){var dv=document.getElementById("sd").value,p=PB;if(!dv||!p)return;if(apply(p.id,p.i,Math.max(0,diff(dv)),document.getElementById("stm").value)){if(p.f==="q"){qi++;qshow()}else{close_();render()}}}
+else if(t.id==="sbk"){var bx=JSON.stringify(leads);if(navigator.share){navigator.share({title:"Follow-up backup",text:bx}).catch(function(){})}else{try{navigator.clipboard.writeText(bx)}catch(x){}t.textContent="Copied. Paste it in WhatsApp"}}});
+if(ST.indexOf("Visit planned")<0)ST.splice(3,0,"Visit planned");
+var GQ=[];
+TPL.push({n:"CGT date reminder",od:"ନମସ୍କାର {name}, ଆପଣଙ୍କ CGT {date} ରେ ଅଛି। ଦୟାକରି ଆଧାର କାର୍ଡ, ଭୋଟର କାର୍ଡ, ପାସବୁକ୍ ଓ ଗ୍ୟାରେଣ୍ଟରଙ୍କ ସହ ଆସନ୍ତୁ। - ଆଲୋକ, Fusion Finance",en:"Hello {name}, your CGT is on {date}. Please come with your Aadhaar, Voter ID, passbook and guarantor. - Alok, Fusion Finance"},{n:"Ask for a referral",od:"ନମସ୍କାର {name}, Fusion Finance ସହ ଯୁକ୍ତ ହେଲାପାଇଁ ଧନ୍ୟବାଦ। ଆପଣଙ୍କ ପରିଚିତ ଅନ୍ୟ ମହିଳାଙ୍କୁ ଋଣ ଦରକାର ହେଲେ ମୋତେ ଜଣାନ୍ତୁ। - ଆଲୋକ",en:"Hello {name}, thank you for being with Fusion Finance. If someone you know needs a loan, please tell me. - Alok"});
+function winl(){if(!S.wf||!S.wt)return"";var h=new Date().getHours(),ok=h>=S.wf&&h<S.wt;return'<div class="hint" style="margin-bottom:6px">Calling window '+S.wf+':00 to '+S.wt+':00. '+(ok?"Open now.":"Closed now.")+'</div>'}
+function refs(){var L=leads.filter(function(l){return l.rdate&&!l.rdone&&diff(l.rdate)<=0});return L.length?'<div class="grp">Ask for referrals ('+L.length+')</div>'+L.map(function(l){return card(l)+'<div class="acts" style="margin:-4px 0 10px"><button class="btn p" data-rg="'+l.id+'">Asked, got names</button><button class="btn" data-rl="'+l.id+'">Ask later (7 days)</button></div>'}).join(""):""}
+function insights(){var A={},F={};leads.forEach(function(l){if(l.reason)A[l.reason]=(A[l.reason]||0)+1;if(l.ref)F[l.ref]=(F[l.ref]||0)+1});
+var row=function(o){var k=Object.keys(o).sort(function(a,b){return o[b]-o[a]}).slice(0,6);return k.length?k.map(function(x){return'<div class="stat"><span>'+esc(x)+'</span><b>'+o[x]+'</b></div>'}).join(""):'<p class="hint">Nothing yet.</p>'};
+return'<div class="card"><b>Why customers delay or say no</b>'+row(A)+'</div><div class="card"><b>Top referrers</b>'+row(F)+'</div>'}
+function cvis(){if(!FCt)return"";var L=leads.filter(function(l){return l.centre===FCt}),c=function(s){return L.filter(function(l){return l.status===s})},dp=c("Docs pending");
+var rows=["New","Interested","Deciding","Visit planned","Agreed","CGT planned","CGT done","Docs pending"].map(function(s){return c(s).length?'<div class="stat"><span>'+s+'</span><b>'+c(s).length+'</b></div>':""}).join("");
+return'<div class="card"><b>Visit sheet: '+esc(FCt)+'</b>'+rows+'<div class="hint" style="margin-top:6px">Not called yet: '+L.filter(function(l){return!l.notes.length}).length+'</div>'+(dp.length?'<button class="btn p" id="gms" style="width:100%;margin-top:8px">Send documents message to '+dp.length+' Docs pending</button>':"")+'</div>'}
+document.addEventListener("click",function(e){var t=e.target,d=t.dataset,l;
+if(d.rg&&(l=lget(d.rg))){l.rdone=true;l.notes.push({d:today(),t:"Asked for referrals"});save();render()}
+else if(d.rl&&(l=lget(d.rl))){l.rdate=plus(7);save();render()}
+else if(t.id==="gms"){GQ=leads.filter(function(x){return x.centre===FCt&&x.status==="Docs pending"&&x.phone}).map(function(x){return x.id});if(GQ.length){mtpl=2;msheet(GQ[0])}}
+else if(t.id==="gnx"){GQ.shift();if(GQ.length)msheet(GQ[0]);else close_()}});
+document.head.appendChild(Object.assign(document.createElement("style"),{textContent:'.qg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}.qg button{min-height:56px;font-size:16px;border-radius:12px;border:1px solid var(--ln);background:var(--bg);cursor:pointer}.callbig{width:100%;min-height:72px;font-size:22px;margin-top:10px}#qs,#qn{min-height:64px;font-size:18px}.chips button.on{background:var(--ac);color:var(--acx);border-color:var(--ac)}.chips button{min-height:44px}.acts a,.acts button{min-height:48px}details.sec{border-top:1px solid var(--ln);margin-top:10px;padding-top:6px}details.sec summary{font-weight:700;padding:10px 0;cursor:pointer;list-style:none;color:var(--ac)}details.sec summary::before{content:"\\25B8 "}details.sec[open] summary::before{content:"\\25BE "}'}));
+var ICB=ICBTN;ICBTN="";
+function ri(t){return allR().findIndex(function(r){return r.t===t})}
+function qb(id,t,l){var i=ri(t);return i<0?"":'<button data-qr="'+i+'" data-id="'+id+'">'+(l||t)+'</button>'}
+function sug(l){var s=l.status;if(s==="Agreed"&&!l.cgt)return"set a CGT date";if(s==="CGT planned")return"confirm documents and group";if(s==="CGT done"&&!l.disbursedOn)return"find out why the loan is not given";if(s==="Deciding")return"ask for her decision";if(s==="Docs pending")return"ask for the missing documents";if(s==="Interested")return"fix a CGT or visit date";if(!l.notes.length)return"introduce the loan offer";return""}
+function qshow(){var l=lget(Q[qi]);if(!l){op('<b style="font-size:18px">All done</b><p class="hint">No more calls in this list.</p><div class="row"><button class="btn p" id="cx">Close</button></div>');render();return}
+var last=l.notes[l.notes.length-1],sg=sug(l);
+op('<div class="hint">'+(qi+1)+' of '+Q.length+'</div><div style="height:6px;background:var(--ln);border-radius:4px;margin:4px 0 10px"><div style="width:'+Math.round(qi*100/Q.length)+'%;height:6px;background:var(--ac);border-radius:4px"></div></div><b style="font-size:24px">'+esc(l.name)+'</b><div class="meta">'+esc(l.centre||"")+(l.loan?" • ₹"+esc(l.loan):"")+(l.best?" • "+esc(l.best):"")+'</div>'+(l.att>1?'<div class="due" style="color:var(--er)">Not reached '+l.att+' times</div>':"")+(last?'<div class="note">Last: '+esc(last.t)+' ('+esc(last.d)+')</div>':"")+(sg?'<div class="ok" style="margin-top:6px">Next step: '+sg+'</div>':"")+
+(l.phone?'<a class="btn p callbig" href="tel:'+esc(l.phone)+'">Call '+esc(l.phone)+'</a>':'<div class="hint">No phone saved</div>')+(l.ph2?'<a class="btn" href="tel:'+esc(l.ph2)+'" style="width:100%;margin-top:8px">Call second number</a>':"")+
+'<label>Didn’t pick</label><div class="qg">'+qb(l.id,"NR")+qb(l.id,"Busy")+qb(l.id,"Switch off")+qb(l.id,"Network issue")+'</div><label>Talked</label><div class="qg">'+qb(l.id,"Interested")+qb(l.id,"Will decide, call back","Will decide")+qb(l.id,"Husband will decide","Husband decides")+qb(l.id,"Not interested")+'</div><label>Next step</label><div class="qg">'+qb(l.id,"Agreed for loan","Agreed")+qb(l.id,"CGT planned")+qb(l.id,"Docs not ready")+qb(l.id,"Disbursement","Loan given")+'</div><div class="row"><button class="btn" id="qk">Skip</button><button class="btn" data-e="'+l.id+'">Edit details</button><button class="btn" id="cx">Stop</button></div>')}
+function organize(){var f=document.getElementById("form");if(!f||!f.querySelector("#sv2"))return;
+var SEC=[["Follow-up and decision",/call at|decision|she wants|quick remark|delay|reason if|why/i],["CGT",/cgt/i],["Payment",/payment/i],["Notes",/new note|referred/i]],kids=[].slice.call(f.children),cur=null,pre=true,secs={},foot=[];
+kids.forEach(function(el){if(el.matches(".hist")||(el.matches(".row")&&el.querySelector("#sv2,#cx,#dl,a.btn"))){foot.push(el);return}
+if(el.tagName==="LABEL"){var tx=el.textContent,nm="Basics";SEC.forEach(function(s){if(s[1].test(tx))nm=s[0]});cur=nm;pre=false}
+if(pre)return;if(!secs[cur]){var d=document.createElement("details");d.className="sec";if(cur==="Basics"||cur==="Notes")d.open=true;var sm=document.createElement("summary");sm.textContent=cur;d.appendChild(sm);secs[cur]=d}secs[cur].appendChild(el)});
+["Basics","Follow-up and decision","CGT","Payment","Notes"].forEach(function(n){if(secs[n])f.appendChild(secs[n])});foot.forEach(function(el){f.appendChild(el)})}
+var _sh=sheet;sheet=function(a,b,c){_sh(a,b,c);organize()};
+var _r2=render;render=function(){_r2();var q=document.getElementById("q"),v=document.getElementById("view"),qv=q.value.trim();
+document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.dataset.t===tab||(b.dataset.t==="all"&&(tab==="new"||tab==="later")))});
+if(!qv&&(tab==="all"||tab==="new"||tab==="later")){var ch=[["all","All"],["new","Not called"],["later","Follow-ups"]].map(function(x){return'<button data-sub="'+x[0]+'" class="'+(tab===x[0]?"on":"")+'">'+x[1]+'</button>'}).join("");v.innerHTML='<div class="chips" style="margin:0 0 10px">'+ch+'</div>'+v.innerHTML}
+if(!qv&&tab==="stats")v.innerHTML+='<div class="card"><b>Reminders</b><p class="hint">Save timed calls, CGT dates and payment promises to your calendar.</p>'+ICB+'</div>'};
+document.getElementById("q").addEventListener("input",function(){render()});
+document.addEventListener("click",function(e){var s=e.target.dataset.sub;if(s){tab=s;render()}});
+S.mday=S.mday||{};S.lang=S.lang||"en";var BS=false;
+function MON(){return today().slice(0,7)}
+function overd(){return leads.filter(function(l){return open_(l)&&l.next&&diff(l.next)<0})}
+function dueNow(){return leads.filter(function(l){return open_(l)&&l.next&&diff(l.next)<=0})}
+function spread(L,st){var pd=S.dt||30;L.sort(function(a,b){return(a.centre||"~").localeCompare(b.centre||"~")}).forEach(function(l,i){l.next=plus(st+Math.floor(i/pd));l.ct=""});save();render()}
+var OD={"Today":"ଆଜି","Customers":"ଗ୍ରାହକ","Hot":"ଜରୁରୀ","Summary":"ସାରାଂଶ","Call":"ଫୋନ୍ କରନ୍ତୁ","Save":"ସଂରକ୍ଷଣ","Cancel":"ବାତିଲ୍","Close":"ବନ୍ଦ","Skip":"ଛାଡ଼ନ୍ତୁ","Stop":"ବନ୍ଦ କରନ୍ତୁ","Busy":"ବ୍ୟସ୍ତ","Switch off":"ସୁଇଚ୍ ଅଫ୍","Interested":"ଆଗ୍ରହୀ","Not interested":"ଆଗ୍ରହୀ ନୁହଁନ୍ତି","Agreed":"ରାଜି","Overdue":"ବକେୟା କଲ୍","Due today":"ଆଜିର କଲ୍","Update":"ଅପଡେଟ୍","Message":"ମେସେଜ୍","Talked":"କଥା ହେଲା","Next step":"ପରବର୍ତ୍ତୀ ପଦକ୍ଷେପ","Close the day":"ଦିନ ବନ୍ଦ କରନ୍ତୁ","Loans this month":"ଏହି ମାସର ଋଣ"};
+function tr(){if(S.lang!=="or")return;var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),n,A=[];while(n=w.nextNode())A.push(n);A.forEach(function(n){var t=n.nodeValue.trim(),p=n.parentNode.tagName;if(OD[t]&&p!=="OPTION"&&p!=="SCRIPT"&&p!=="STYLE")n.nodeValue=n.nodeValue.replace(t,OD[t])})}
+var _op=op;op=function(h){_op(h);tr()};
+function statx(){var SR={};leads.forEach(function(l){var k=l.src||"Not set";SR[k]=SR[k]||[0,0];SR[k][0]++;if(l.disbursedOn)SR[k][1]++});
+var rows=Object.keys(SR).map(function(k){return'<div class="stat"><span>'+esc(k)+'</span><b>'+SR[k][1]+' loans / '+SR[k][0]+'</b></div>'}).join(""),DN=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+return'<div class="card"><b>Where members come from</b>'+rows+'</div><div class="card"><b>Centre meeting day</b><p class="hint">'+esc(S.centres.filter(function(c){return S.mday[c]!=null}).map(function(c){return c+": "+DN[S.mday[c]]}).join(", ")||"None set")+'</p><select id="mc1"><option value="">Centre</option>'+opts(S.centres,"")+'</select><select id="md1">'+DN.map(function(d,i){return'<option value="'+i+'">'+d+'</option>'}).join("")+'</select><button class="btn" id="mds" style="width:100%;margin-top:8px">Save meeting day</button></div><div class="card"><button class="btn p" id="col" style="width:100%">Collection list</button><button class="btn" id="lng" style="width:100%;margin-top:8px">'+(S.lang==="or"?"Switch to English":"ଓଡ଼ିଆ ଭାଷା")+'</button></div>'}
+function coll(c){var L=leads.filter(function(l){return l.emi&&(!c||l.centre===c)}),du=0,go=0;L.forEach(function(l){du+=+l.emi;if(l.paidM===MON())go+=+l.emi});
+op('<b style="font-size:18px">Collection list</b><label>Centre</label><select id="cc"><option value="">All centres</option>'+opts(S.centres,c||"")+'</select><div class="stat"><span>Collected / due</span><b>₹'+go+' / ₹'+du+'</b></div>'+(L.length?L.map(function(l){return'<label style="display:flex;gap:8px;align-items:center;color:var(--tx)"><input type="checkbox" data-cp="'+l.id+'"'+(l.paidM===MON()?" checked":"")+' style="width:auto"> '+esc(l.name)+' ₹'+esc(l.emi)+'</label>'}).join(""):'<p class="hint">No EMI amounts yet. Add one in a member’s Update screen, Payment section.</p>')+'<div class="row"><button class="btn" id="cx">Close</button></div>')}
+function dayclose(){var c=0;leads.forEach(function(l){l.notes.forEach(function(x){if(x.d===today())c++})});var u=dueNow().length,tm=leads.filter(function(l){return open_(l)&&l.next===plus(1)}).length;
+op('<b style="font-size:18px">Close the day</b><div class="stat"><span>Calls logged today</span><b>'+c+'</b></div><div class="stat"><span>Calls still pending</span><b>'+u+'</b></div><div class="stat"><span>Already planned tomorrow</span><b>'+tm+'</b></div>'+(u?'<button class="btn p" id="mvd" style="width:100%;margin-top:10px">Move '+u+' pending calls to tomorrow</button>':"")+'<button class="btn" id="sbk" style="width:100%;margin-top:8px">Share backup (WhatsApp)</button><p class="hint">Back up now, then stop work.</p><div class="row"><button class="btn" id="cx">Close</button></div>')}
+var PQ=["Age 18 to 60","Has Aadhaar","Has Voter ID or other photo ID","Has a bank account in her name","No other loans beyond the limit","Lives in the area long term","Family agrees to the loan"];
+function pre(){op('<b style="font-size:18px">Eligibility pre-check</b><p class="hint">Tick what is true. Confirm final rules with your branch.</p>'+PQ.map(function(q){return'<label style="display:flex;gap:8px;align-items:center;color:var(--tx)"><input type="checkbox" class="pq" style="width:auto"> '+q+'</label>'}).join("")+'<p class="ok" id="pr">0 of '+PQ.length+' ticked</p><div class="row"><button class="btn" id="cx">Close</button></div>')}
+function histEdit(id){var l=lget(id),h=document.querySelector("#form .hist");if(!l||!h)return;h.innerHTML=l.notes.map(function(n,i){return{n:n,i:i}}).reverse().map(function(o){return'<div>'+esc(o.n.d)+": "+esc(o.n.t)+' <button data-ne="'+o.i+'" data-id="'+id+'" style="min-height:32px;padding:0 8px">Edit</button> <button data-nd="'+o.i+'" data-id="'+id+'" style="min-height:32px;padding:0 8px">Delete</button></div>'}).join("")}
+var _sh3=sheet;sheet=function(a,b,c){_sh3(a,b,c);var f=document.getElementById("form"),l=lget(a)||{},ds=[].slice.call(f.querySelectorAll("details.sec")),g=function(n){return ds.filter(function(d){return d.firstChild.textContent===n})[0]};
+if(g("Basics"))g("Basics").insertAdjacentHTML("beforeend",'<label>Where did she come from?</label><select id="fsr">'+opts(["","Poster","Referral","Centre meeting","Walk-in","Excel list","Other"],l.src)+'</select>');
+if(g("Payment"))g("Payment").insertAdjacentHTML("beforeend",'<label>EMI amount per month (optional)</label><input id="fem" type="number" inputmode="numeric" value="'+esc(l.emi)+'">');histEdit(a);tr()};
+var _r3=render;render=function(){_r3();var q=document.getElementById("q"),v=document.getElementById("view"),qv=q.value.trim();if(qv){tr();return}
+if(tab==="today"){var o=overd().length,h="",td=(new Date().getDay()+1)%7,mc=S.centres.filter(function(c){return S.mday[c]===td}),ml=leads.filter(function(l){return open_(l)&&mc.indexOf(l.centre)>=0});
+if(o)h+='<button class="btn" id="ovr" style="width:100%;margin-bottom:8px">Move '+o+' overdue to tomorrow, spread by centre</button>';
+if(ml.length)h+='<div class="card"><b>Meeting tomorrow: '+esc(mc.join(", "))+'</b><div class="hint">'+ml.length+' members to call before the meeting</div><button class="btn p" id="qm" style="width:100%;margin-top:8px">Call them now</button></div>';
+v.innerHTML=h+v.innerHTML+'<button class="btn" id="dcl" style="width:100%;margin:14px 0">Close the day</button>'}
+if(tab==="all"||tab==="new"||tab==="later"){var ch=v.firstChild;if(ch&&ch.className==="chips")ch.insertAdjacentHTML("beforeend",'<button id="bsel" class="'+(BS?"on":"")+'">Select several</button><button id="pre">Pre-check</button>');
+if(tab==="all"&&FCt)v.insertAdjacentHTML("afterbegin",'<a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(FCt+" Odisha")+'" style="width:100%;margin-bottom:8px">Open '+esc(FCt)+' in Maps</a>');
+if(BS){v.querySelectorAll(".card").forEach(function(c){var b=c.querySelector("[data-e]");if(b)c.insertAdjacentHTML("afterbegin",'<label style="display:flex;gap:8px;align-items:center;margin:0 0 6px;color:var(--tx)"><input type="checkbox" class="bk" data-id="'+b.dataset.e+'" style="width:auto"> Select</label>')});
+v.insertAdjacentHTML("afterbegin",'<div class="card"><b>Change selected</b><label>Status</label><select id="bst"><option value="">No change</option>'+opts(ST,"")+'</select><label>Next date</label><input id="bdt" type="date"><div class="row"><button class="btn" id="bsa">Select all</button><button class="btn p" id="bap">Apply</button></div></div>')}}
+if(tab==="stats")v.innerHTML+=statx();tr()};
+document.addEventListener("click",function(e){var t=e.target;if(t.id!=="sv2")return;if(!document.getElementById("fn").value.trim())return;var sr=document.getElementById("fsr"),em=document.getElementById("fem"),id=t.dataset.id,n0=leads.length;
+if(id){var l=lget(id);if(l){if(sr)l.src=sr.value;if(em)l.emi=em.value}}else{var sv=sr&&sr.value,ev=em&&em.value;setTimeout(function(){if(leads.length>n0){var l=leads[leads.length-1];l.src=sv;l.emi=ev;save()}},0)}},true);
+document.addEventListener("click",function(e){var t=e.target,d=t.dataset,l;
+if(t.id==="ovr")spread(overd(),1);
+else if(t.id==="dcl")dayclose();
+else if(t.id==="mvd"){spread(dueNow(),1);close_()}
+else if(t.id==="qm"){var td=(new Date().getDay()+1)%7,mc=S.centres.filter(function(c){return S.mday[c]===td});Q=leads.filter(function(x){return open_(x)&&mc.indexOf(x.centre)>=0}).map(function(x){return x.id});qi=0;qshow()}
+else if(t.id==="bsel"){BS=!BS;render()}
+else if(t.id==="bsa"){document.querySelectorAll(".bk").forEach(function(c){c.checked=true})}
+else if(t.id==="bap"){var st=document.getElementById("bst").value,dt=document.getElementById("bdt").value;document.querySelectorAll(".bk:checked").forEach(function(c){var x=lget(c.dataset.id);if(!x)return;if(st){x.status=st;x.sd=today()}if(dt)x.next=dt;x.notes.push({d:today(),t:"Bulk update"})});BS=false;save();render()}
+else if(t.id==="pre")pre();
+else if(t.id==="col")coll("");
+else if(t.id==="lng"){S.lang=S.lang==="or"?"en":"or";sset();render()}
+else if(t.id==="mds"){var c1=document.getElementById("mc1").value;if(c1){S.mday[c1]=+document.getElementById("md1").value;sset();render()}}
+else if(d.ne!=null&&(l=lget(d.id))){t.parentNode.innerHTML='<input id="ned" value="'+esc(l.notes[+d.ne].t)+'"><button data-ns="'+d.ne+'" data-id="'+d.id+'">Save</button>'}
+else if(d.ns!=null&&(l=lget(d.id))){l.notes[+d.ns].t=document.getElementById("ned").value;save();histEdit(d.id)}
+else if(d.nd!=null&&(l=lget(d.id))){if(t.dataset.arm){l.notes.splice(+d.nd,1);save();histEdit(d.id)}else{t.dataset.arm=1;t.textContent="Sure?"}}});
+document.addEventListener("change",function(e){var s=e.target,l;
+if(s.id==="cc")coll(s.value);
+else if(s.dataset.cp&&(l=lget(s.dataset.cp))){l.paidM=s.checked?MON():"";save();coll(document.getElementById("cc").value)}
+else if(s.className==="pq"){var n=document.querySelectorAll(".pq:checked").length,m=document.getElementById("pr");m.textContent=n+" of "+PQ.length+" ticked. "+(n===PQ.length?"Likely eligible. Go ahead.":n>=5?"Check the missing points first.":"Not ready yet. Ask her to fix these first.")}});
+S.big=!!S.big;S.one=!!S.one;S.ord=S.ord||"p";var LC=null,LD=0,PID="",HID=0,IT;
+document.head.appendChild(Object.assign(document.createElement("style"),{textContent:'body.big main{zoom:1.15}body.one #qs{position:fixed;left:12px;right:12px;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:15}body.one .fab{bottom:calc(140px + env(safe-area-inset-bottom,0px))}body.one{padding-bottom:230px}.hl{outline:3px solid var(--ac)}'}));
+function appl(){document.body.classList.toggle("big",S.big);document.body.classList.toggle("one",S.one)}
+function dg(x){return String(x||"").replace(/\D/g,"").slice(-10)}
+function score(l){var s=(+l.loan||0)/1000;if(l.status==="CGT planned"&&l.cgt&&diff(l.cgt)<=0)s+=100;if(l.ct)s+=80;if(["Agreed","CGT done"].indexOf(l.status)>=0)s+=60;if(["Deciding","Interested","Docs pending"].indexOf(l.status)>=0)s+=40;if(l.next)s+=Math.min(20,-diff(l.next)*2);return s-(l.att||0)*5}
+function prio(){return dueNow().sort(function(a,b){return score(b)-score(a)})}
+function qgs(l,at){function b(t,lb){var i=ri(t);return i<0?"":'<button '+at+'="'+i+'" data-id="'+l.id+'">'+(lb||t)+'</button>'}
+return'<label>Didn’t pick</label><div class="qg">'+b("NR")+b("Busy")+b("Switch off")+b("Network issue")+'</div><label>Talked</label><div class="qg">'+b("Interested")+b("Will decide, call back","Will decide")+b("Husband will decide","Husband decides")+b("Not interested")+'</div><label>Next step</label><div class="qg">'+b("Agreed for loan","Agreed")+b("CGT planned")+b("Docs not ready")+b("Disbursement","Loan given")+'</div>'}
+function hl(){if(!LD)return;var N=["NR","Busy","Switch off","Network issue"],T=["Interested","Will decide","Husband decides","Agreed","CGT planned"];document.querySelectorAll("#form .qg button").forEach(function(b){var t=b.textContent.trim();b.classList.toggle("hl",(LD<15&&N.indexOf(t)>=0)||(LD>=45&&T.indexOf(t)>=0))})}
+var _qs=qshow;qshow=function(){LD=0;PID="";_qs();if(document.querySelector("#form .qg"))document.getElementById("form").insertAdjacentHTML("beforeend",'<button class="btn" id="vr" style="width:100%;margin-top:8px">🎤 Say result</button>')};
+function back(){if(!LC||Date.now()-LC.t<4000)return;LD=Math.round((Date.now()-LC.t)/1000);var c=LC;LC=null;if(c.q&&Q.length&&document.getElementById("sheet").classList.contains("open")){hl();return}
+var l=lget(c.id);if(!l)return;PID=c.id;op('<b style="font-size:18px">How did the call go?</b><div class="meta">'+esc(l.name)+' • away about '+LD+' seconds</div>'+qgs(l,"data-pr")+'<div class="row"><button class="btn" id="cx">Later</button><button class="btn" id="vr">🎤 Say result</button></div>');hl()}
+function vres(id,s){var K=[["not interested","Not interested"],["husband|family","Husband will decide"],["decide|think","Will decide, call back"],["busy","Busy"],["switch","Switch off"],["network","Network issue"],["no answer|not pick|nr","NR"],["interested","Interested"],["agree","Agreed for loan"],["cgt","CGT planned"],["document|docs","Docs not ready"],["call back|callback|call later","Call back"]],t=null;
+for(var k=0;k<K.length&&!t;k++)if(new RegExp(K[k][0]).test(s))t=K[k][1];if(!t)return;var i=ri(t),r=allR()[i],dd=/tomorrow/.test(s)?1:/today/.test(s)?0:null,tm=/evening/.test(s)?"17:00":/morning/.test(s)?"10:00":/afternoon/.test(s)?"14:00":"";
+CF=PID?"c":"q";var ok=(r.ask&&(dd!=null||tm))?apply(id,i,dd==null?1:dd,tm):apply(id,i);if(ok){if(PID){close_();render()}else{qi++;qshow()}}}
+function weekly(){var f=plus(-6),c=0,r=0,ln=0,C={};leads.forEach(function(l){if(l.disbursedOn&&l.disbursedOn>=f)ln++;l.notes.forEach(function(x){if(x.d>=f){c++;var k=l.centre||"No centre";C[k]=C[k]||[0,0];C[k][0]++;if(NRS.indexOf(x.t)<0){r++;C[k][1]++}}})});
+var A=Object.keys(C).filter(function(k){return C[k][0]>=3}).sort(function(a,b){return C[b][1]/C[b][0]-C[a][1]/C[a][0]});
+op('<b style="font-size:18px">Weekly review</b><div class="stat"><span>Calls logged (7 days)</span><b>'+c+'</b></div><div class="stat"><span>Someone answered</span><b>'+r+(c?" ("+Math.round(r*100/c)+"%)":"")+'</b></div><div class="stat"><span>Loans given</span><b>'+ln+'</b></div>'+(A.length?'<div class="stat"><span>Best centre</span><b>'+esc(A[0])+'</b></div><div class="stat"><span>Hardest centre</span><b>'+esc(A[A.length-1])+'</b></div>':'<p class="hint">Not enough calls per centre yet.</p>')+'<div class="row"><button class="btn" id="cx">Close</button></div>')}
+var _ut=utoast;utoast=function(m){_ut(m);var rt=m.split(": ").slice(1).join(": "),M={"Docs not ready":"Documents needed","Docs pending":"Documents needed","NR":"Missed call","Switch off":"Missed call","Busy":"Missed call","Disbursement":"Thank you","Agreed for loan":"CGT","CGT planned":"CGT"},k=M[rt];if(!k||!UNDO)return;var ix=TPL.findIndex(function(t){return t.n.indexOf(k)>=0});if(ix<0)return;var b=document.getElementById("ut");if(b)b.insertAdjacentHTML("beforeend",'<button data-um="'+ix+'" style="min-height:40px;padding:0 12px;border:0;border-radius:8px;background:var(--bg);color:var(--tx);font-weight:700">Message</button>')};
+var _lk=lock;lock=function(){if(document.getElementById("lkx"))return;_lk();var d=document.body.lastChild;if(d&&d.style)d.id="lkx"};
+function idle(){clearTimeout(IT);if(S.pin)IT=setTimeout(lock,180000)}
+var _r4=render;render=function(){_r4();var q=document.getElementById("q"),v=document.getElementById("view");if(q.value.trim())return;
+if(tab==="today"){var P=prio().slice(0,5),h=P.length?'<div class="grp">Next best calls</div>'+P.map(card).join(""):"",b=v.querySelector("#qs");if(b)b.insertAdjacentHTML("afterend",h);else v.insertAdjacentHTML("afterbegin",h);
+if(new Date().getDay()===0)v.insertAdjacentHTML("afterbegin",'<button class="btn" id="wk" style="width:100%;margin-bottom:8px">Sunday: open your weekly review</button>')}
+if(tab==="stats")v.innerHTML+='<div class="card"><button class="btn" id="wk" style="width:100%">Weekly review</button><label>Call order for Start calling</label><div class="row" style="margin-top:0"><button class="btn'+(S.ord==="p"?" p":"")+'" id="ordp">Priority</button><button class="btn'+(S.ord==="c"?" p":"")+'" id="ordc">By centre</button></div><label>Display</label><div class="row" style="margin-top:0"><button class="btn'+(S.big?" p":"")+'" id="big">Large text</button><button class="btn'+(S.one?" p":"")+'" id="one">One-hand mode</button></div></div>'};
+document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest('a[href^="tel:"]');if(!a)return;var n=dg(a.getAttribute("href").slice(4)),l=leads.filter(function(x){return dg(x.phone)===n||dg(x.ph2)===n})[0];if(l)LC={id:l.id,t:Date.now(),q:document.getElementById("sheet").classList.contains("open")}},true);
+document.addEventListener("click",function(e){if(e.target.id!=="qs")return;e.stopPropagation();Q=(S.ord==="p"?prio():dueNow().sort(function(a,b){return(a.centre||"~").localeCompare(b.centre||"~")||(+b.loan||0)-(+a.loan||0)})).map(function(l){return l.id});qi=0;qshow()},true);
+document.addEventListener("visibilitychange",function(){if(!document.hidden){setTimeout(back,300);if(S.pin&&HID&&Date.now()-HID>180000)lock()}else HID=Date.now()});
+document.addEventListener("touchstart",idle);
+document.addEventListener("click",function(e){var t=e.target,d=t.dataset;idle();
+if(d.pr!=null){CF="c";if(apply(d.id,+d.pr)){close_();render()}}
+else if(d.um!=null&&UNDO){mtpl=+d.um;msheet(UNDO.id)}
+else if(t.id==="wk")weekly();
+else if(t.id==="ordp"||t.id==="ordc"){S.ord=t.id==="ordp"?"p":"c";sset();render()}
+else if(t.id==="big"||t.id==="one"){S[t.id]=!S[t.id];sset();appl();render()}
+else if(t.id==="vr"){var SR=window.SpeechRecognition||window.webkitSpeechRecognition,id=PID||Q[qi];if(!SR){t.textContent="Not supported on this phone";return}if(!id)return;var r=new SR();r.lang="en-IN";r.onresult=function(ev){vres(id,ev.results[0][0].transcript.toLowerCase())};r.onerror=function(){t.textContent="Mic blocked"};t.textContent="Listening…";try{r.start()}catch(x){}}});
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(function(){});
+if(S.pin)lock();
+render();appl();idle();
+var go=(location.search.match(/go=(\w+)/)||[])[1];if(go==="call"){Q=prio().map(function(l){return l.id});qi=0;qshow()}else if(go==="add")sheet("");else if(go==="today"){tab="today";render()}
+</script>
+</body>
+</html>
